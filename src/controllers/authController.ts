@@ -3,6 +3,9 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 import { User } from '../models/User';
+import { sendEmail } from '../config/mailer';
+import { IOptions } from '../interfaces/IConfig';
+
 
 interface IUserBD {
     name:string;
@@ -17,6 +20,12 @@ class Auth {
     private time: string;
 
     constructor() {
+
+        this.userBD = {
+            name: '',
+            email: '',
+            id: '',
+        }
 
         this.seed = process.env.SEED || "";
         this.time = process.env.SEED_TIME || "";
@@ -44,8 +53,20 @@ class Auth {
         
         try {
 
-            const userBD = await User.findOne({ email: email });
-            const isPassword = bcrypt.compareSync(password, userBD.password);
+            const userBD = await User.findOne({ email });
+
+            if (!userBD) {
+                
+                res.status(400).json({
+                    error: true,
+                    code: 400,
+                    data: "Datos incorrectos",
+                });
+
+                return;
+            }
+
+            const isEqual:boolean = bcrypt.compareSync(password, userBD.password);
 
             this.setUserBD(userBD);
 
@@ -53,18 +74,24 @@ class Auth {
                 email
             }, this.seed, { expiresIn: this.time });
 
-            if (isPassword) {
+            if (isEqual) {
                 
                 res.status(200).json({
                     error: false,
                     code: 200,
                     token,
                 });
+            
+            } else {
+
+                res.status(400).json({
+                    error: true,
+                    code: 400,
+                    data: "Datos incorrectos",
+                });
             }
 
         } catch(err) {
-
-            console.log(err);
 
             res.status(400).json({
                 error: true,
@@ -73,13 +100,16 @@ class Auth {
         }
     }
 
-    public getInfoPermits = (req:Request, res: Response):void => {
+    public getInfoPermits = async (req:Request, res: Response):Promise<void> => {
 
         const token = req.headers.authorization || "";
+        const userBD = await User.findOne({ token });
 
         try {
 
             jwt.verify(token, this.seed);
+
+            this.setUserBD(userBD);
             
             res.status(200).json({
                 code: 200,
@@ -89,21 +119,50 @@ class Auth {
 
         } catch(err) {
 
+            this.setUserBD({name: '', email: '', id: ''});
+
             res.status(401).json({
                 code: 401,
                 error: true,
                 data: "Sesion expirada",
             });
-
         }
     }
 
     public changePassword = async (req:Request, res: Response):Promise<void> => {
 
-        console.log(req.body);
+        const { passwordCurrent, newPassword } = req.body;
+        const id:string|undefined = this.getUserBD()?.id;
+
+        if (!id) return;
+
+        const userBD = await User.findById(id);
+
+        const isEqual:boolean = bcrypt.compareSync(passwordCurrent, userBD.password);
+
+        if (!isEqual) {
+            
+            res.status(400).json({
+                code: 400,
+                error: true,
+                data: "Comtraseña incorrecta",
+            });
+
+            return;
+        }
+
+        userBD.password = bcrypt.hashSync(newPassword, 12);
+
+        await userBD.save();
+
+        res.status(200).json({
+            code: 200,
+            error: false,
+            data: "Contraseña cambiada con exito",
+        });
     }
 
-    public changePasswordByEmail = async (req:Request, res: Response):Promise<void> => {
+    public sendEmailChangePassword = async (req:Request, res: Response):Promise<void> => {
 
         const { email } = req.body;
 
@@ -119,6 +178,20 @@ class Auth {
 
             return;
         }
+
+        const token = jwt.sign({
+            url: "change-password"
+        }, this.seed, { expiresIn: this.time });
+
+        const url = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+
+        const options:IOptions = {
+            email,
+            subject: "cambiar contraseña (sora)",
+            url,
+        }
+
+        sendEmail(options, res);
     }
 }
 
