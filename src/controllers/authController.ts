@@ -130,7 +130,7 @@ class Auth {
     }
 
     public changePassword = async (req:Request, res: Response):Promise<void> => {
-
+        
         const { passwordCurrent, newPassword } = req.body;
         const id:string|undefined = this.getUserBD()?.id;
 
