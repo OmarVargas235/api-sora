@@ -12,12 +12,11 @@ export class Middleware {
 
     public verifyAuth = async (req:Request, res:Response, next:NextFunction):Promise<void> => {
 
-        const token = req.headers.authorization || "";
+        const token:string = req.headers.authorization || "";
 
         try {
 
             jwt.verify(token, this.seed);
-
             next();
 
         } catch(err) {

@@ -19,7 +19,18 @@ const modelSchema = new mongoose.Schema({
 		required: true,
 		trim: true,
 	},
+	idRol: {
+		type: Number,
+		required: true,
+	},
+	rol: {
+		type: String,
+		required: true,
+		trim: true,
+	},
+	modules: Array,
     img: String,
+	tokenURL: String,
 });
 
 export const User = mongoose.model('User', modelSchema);

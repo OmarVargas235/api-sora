@@ -33,7 +33,7 @@ const transporter:Transporter<SMTPTransport.SentMessageInfo> = nodemailer.create
     },
 });
 
-export const sendEmail = ({ email, subject, url }:IOptions, res:Response):void => {
+export const sendEmail = ({ email, subject, url, token }:IOptions, res:Response):void => {
 
     const message = {
         from: "sora@sora.com",
@@ -46,7 +46,7 @@ export const sendEmail = ({ email, subject, url }:IOptions, res:Response):void =
 
         if (err) {
             
-            res.status(400).json({
+            res.status(200).json({
                 code: 400,
                 error: true,
                 data: "A ocurrido un error, vuelva a intentar",
@@ -59,6 +59,7 @@ export const sendEmail = ({ email, subject, url }:IOptions, res:Response):void =
             code: 200,
             error: false,
             data: "Revise la bandeja de entrada de su correo electronico",
+            tokenUrl: token,
         });
     });
 }

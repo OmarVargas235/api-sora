@@ -4,13 +4,15 @@ import jwt from 'jsonwebtoken';
 
 import { User } from '../models/User';
 import { sendEmail } from '../config/mailer';
-import { IOptions } from '../interfaces/IConfig';
-
+import { IModule, IOptions } from '../interfaces/IConfig';
 
 interface IUserBD {
     name:string;
     email:string;
     id:string;
+    rol:string;
+    idRol:number;
+    modules: IModule[];
 }
 
 class Auth {
@@ -25,6 +27,9 @@ class Auth {
             name: '',
             email: '',
             id: '',
+            rol: '',
+            idRol: 0,
+            modules: [],
         }
 
         this.seed = process.env.SEED || "";
@@ -33,12 +38,15 @@ class Auth {
 
     private setUserBD(data:IUserBD):void {
 
-        const { name, email, id } = data;
-
+        const { name, email, id, rol, idRol, modules } = data;
+        
         this.userBD = {
             name,
             email,
             id,
+            rol,
+            idRol,
+            modules,
         };
     }
 
@@ -104,29 +112,14 @@ class Auth {
 
         const token = req.headers.authorization || "";
         const userBD = await User.findOne({ token });
-
-        try {
-
-            jwt.verify(token, this.seed);
-
-            this.setUserBD(userBD);
-            
-            res.status(200).json({
-                code: 200,
-                error: false,
-                data: this.getUserBD(),
-            });
-
-        } catch(err) {
-
-            this.setUserBD({name: '', email: '', id: ''});
-
-            res.status(401).json({
-                code: 401,
-                error: true,
-                data: "Sesion expirada",
-            });
-        }
+        
+        this.setUserBD(userBD);
+        
+        res.status(200).json({
+            code: 200,
+            error: false,
+            data: this.getUserBD(),
+        });
     }
 
     public changePassword = async (req:Request, res: Response):Promise<void> => {
@@ -162,7 +155,39 @@ class Auth {
         });
     }
 
-    public sendEmailChangePassword = async (req:Request, res: Response):Promise<void> => {
+    public changePasswordByEmail = async (req:Request, res: Response):Promise<void> => {
+        
+        const { newPassword, tokenURL } = req.body;
+
+        const userBD = await User.findOne({ tokenURL });
+
+        if (!userBD) return;
+
+        userBD.password = bcrypt.hashSync(newPassword, 12);
+        userBD.tokenURL = "";
+
+        await userBD.save();
+
+        res.status(200).json({
+            code: 200,
+            error: false,
+            data: "Contraseña cambiada con exito",
+        });
+    }
+
+    public verifyTokenURL = async (req:Request, res: Response):Promise<Object|void> => {
+        
+        const tokenURL:string = req.headers.authorization || "empty";
+        const userBD = await User.findOne({ tokenURL });
+
+        if (!userBD) return res.status(401).json({
+            code: 401,
+            error: true,
+            data: "token vencido"
+        });;
+    }
+
+    public sendEmail = async (req:Request, res: Response):Promise<void> => {
 
         const { email } = req.body;
 
@@ -170,7 +195,7 @@ class Auth {
 
         if (!userBD) {
 
-            res.status(400).json({
+            res.status(200).json({
                 error: true,
                 code: 400,
                 data: "No existe el usuario",
@@ -185,10 +210,14 @@ class Auth {
 
         const url = `${process.env.FRONTEND_URL}/reset-password/${token}`;
 
+        userBD.tokenURL = token;
+        await userBD.save();
+
         const options:IOptions = {
             email,
             subject: "cambiar contraseña (sora)",
             url,
+            token,
         }
 
         sendEmail(options, res);
