@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { body, check, validationResult, ValidationError, Result, ValidationChain } from 'express-validator';
+import { body, ValidationChain } from 'express-validator';
 
 import { auth } from '../controllers/authController';
 import { Middleware } from '../globals/middleware';
@@ -36,32 +36,6 @@ class Routes extends Middleware {
     public getRouter():Router {
 
         return this.router;
-    }
-
-    private async showError(req:Request, res:Response, next:NextFunction):Promise<void> {
-
-        const { repeatPassword } = req.body;
-
-        repeatPassword && await check('newPassword').equals(repeatPassword).withMessage('Los passwords deben de ser iguales').run(req);
-
-        const errors:Result<ValidationError> = validationResult(req);
-        const isErrors:boolean = errors.isEmpty();
-        const msgErros:ValidationError[] = errors.array();
-
-        if (!isErrors) {
-
-            const filterMessagesErrros:string[] = msgErros.map(msg => msg.msg);
-
-            res.status(200).json({
-                code: 400,
-                error: true,
-                data: filterMessagesErrros,
-            });
-            
-            return;
-        }
-
-        next();
     }
 
     private routes = ():void => {

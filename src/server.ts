@@ -3,6 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 
 import { routesAuth } from './routes/auth';
+import { routerUser } from './routes/user';
 
 class Server {
 
@@ -35,6 +36,7 @@ class Server {
     routes():void {
         
         this.app.use( "/api/auth", routesAuth.getRouter() );
+        this.app.use( "/api/users", routerUser.getRouter() );
     }
 
     start():void {

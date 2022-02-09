@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from 'jsonwebtoken';
+import { check, validationResult, ValidationError, Result } from 'express-validator';
 
-export class Middleware {
+export abstract class Middleware {
 
     private seed:string;
 
@@ -10,7 +11,7 @@ export class Middleware {
         this.seed = seed;
     }
 
-    public verifyAuth = async (req:Request, res:Response, next:NextFunction):Promise<void> => {
+    protected verifyAuth = async (req:Request, res:Response, next:NextFunction):Promise<void> => {
 
         const token:string = req.headers.authorization || "";
 
@@ -27,5 +28,31 @@ export class Middleware {
                 data: "No autorizado",
             });
         }
+    }
+
+    protected async showError(req:Request, res:Response, next:NextFunction):Promise<void> {
+
+        const { repeatPassword } = req.body;
+
+        repeatPassword && await check('newPassword').equals(repeatPassword).withMessage('Los passwords deben de ser iguales').run(req);
+
+        const errors:Result<ValidationError> = validationResult(req);
+        const isErrors:boolean = errors.isEmpty();
+        const msgErros:ValidationError[] = errors.array();
+
+        if (!isErrors) {
+
+            const filterMessagesErrros:string[] = msgErros.map(msg => msg.msg);
+
+            res.status(200).json({
+                code: 400,
+                error: true,
+                data: filterMessagesErrros,
+            });
+            
+            return;
+        }
+        
+        next();
     }
 }

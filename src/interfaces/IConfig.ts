@@ -6,7 +6,9 @@ export interface IOptions {
 }
 
 export interface IModule {
-    icon:number,
-    module:string,
-    programs:[...string[], object],
+    access: number[];
+    icon:string;
+    module:string;
+    id:number|string;
+    programs:[...string[], object];
 }

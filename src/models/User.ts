@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 
 const modelSchema = new mongoose.Schema({
+	userName: {
+		type: String,
+		lowercase: true,
+		unique: true,
+	},
     name: {
 		type: String,
 		required: true,
@@ -27,9 +32,13 @@ const modelSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 		trim: true,
+		lowercase: true,
+	},
+	area: {
+		type: Object,
+		required: true,
 	},
 	modules: Array,
-    img: String,
 	tokenURL: String,
 });
 
