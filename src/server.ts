@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 
 import { routesAuth } from './routes/auth';
 import { routerUser } from './routes/user';
+import { routerGlobals } from './globals/routes';
 
 class Server {
 
@@ -37,6 +38,7 @@ class Server {
         
         this.app.use( "/api/auth", routesAuth.getRouter() );
         this.app.use( "/api/users", routerUser.getRouter() );
+        this.app.use( "/api/globals", routerGlobals.getRouter() );
     }
 
     start():void {

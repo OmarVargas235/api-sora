@@ -9,6 +9,47 @@ import { modules } from '../utils/modules';
 
 class UserController {
 
+    public getUsers = async (req:Request, res:Response):Promise<void> => {
+
+        const { username, name, quantity, page, idRol, idArea } = req.query;
+
+        if (!quantity || !page) {
+            
+            res.status(400).json({
+                code: 400,
+                error: true,
+                data: "Debes enviar el campo 'Cantidad' y 'Pagina'"
+            });
+
+            return;
+        }
+
+        if (Number(quantity) < 1 || Number(page) < 1) {
+            
+            res.status(200).json({
+                code: 200,
+                error: false,
+                data: [],
+            });
+
+            return;
+        }
+        
+        let usersBD = await User.find({
+            $or: [{userName: username}, {name}, {idRol}, {'area.id': Number(idArea)}],
+        }).limit( Number(quantity) ).skip( Number(page)-1 );
+        
+        usersBD = usersBD.length === 0
+            ?  await User.find().limit( Number(quantity) ).skip( Number(page)-1 )
+            : usersBD;
+
+        res.status(200).json({
+            error: false,
+            code: 200,
+            data: usersBD,
+        });
+    }
+
     public createUser = async (req:Request, res:Response):Promise<void> => {
 
         const { idRol, idArea, userName, email, password, name } = req.body;
@@ -74,6 +115,30 @@ class UserController {
                 error: false,
                 code: 200,
                 data: "Usuario actualizado con exito",
+            });
+        
+        } catch(err:any) {
+
+            err.kind === 'ObjectId' && res.status(200).json({
+                error: true,
+                code: 400,
+                data: "Este usuario no existe",
+            });
+        }
+    }
+
+    public deleteUser = async (req:Request, res:Response):Promise<void> => {
+
+        const { id } = req.body;
+        
+        try {
+
+            const userBD = await User.findByIdAndDelete(id);
+
+            res.status(200).json({
+                error: false,
+                code: 200,
+                data: "Usuario eliminado con exito",
             });
         
         } catch(err:any) {

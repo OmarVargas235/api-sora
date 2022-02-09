@@ -9,9 +9,7 @@ class UserRoutes extends Middleware {
     private router:Router;
     private validateUser:ValidationChain[];
     private validateCreateUser:ValidationChain[];
-    private validateUpdateUser:ValidationChain[];
-    // private validateFormChangePassword:ValidationChain[];
-    // private validateFormChangePasswordByEmail:ValidationChain[];
+    private validateIDUser:ValidationChain[];
 
     constructor() {
 
@@ -27,7 +25,7 @@ class UserRoutes extends Middleware {
         this.validateCreateUser = [
             body('password').not().isEmpty().escape().withMessage('El campo password es requerido'),
         ];
-        this.validateUpdateUser = [
+        this.validateIDUser = [
             body('id').not().isEmpty().escape().withMessage('El ID es requerido'),
         ];
 
@@ -41,6 +39,12 @@ class UserRoutes extends Middleware {
 
     private routes = ():void => {
 
+        this.router.get('/get-users',
+            this.verifyAuth,
+            this.showError,
+            user.getUsers,
+        );
+
         this.router.post('/create-user',
             this.validateUser,
             this.validateCreateUser,
@@ -51,10 +55,17 @@ class UserRoutes extends Middleware {
 
         this.router.put('/update-user',
             this.validateUser,
-            this.validateUpdateUser,
+            this.validateIDUser,
             this.verifyAuth,
             this.showError,
             user.updateUser,
+        );
+
+        this.router.delete('/delete-user',
+            this.validateIDUser,
+            this.verifyAuth,
+            this.showError,
+            user.deleteUser,
         );
     }
 }
