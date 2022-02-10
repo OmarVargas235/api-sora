@@ -37,10 +37,10 @@ class UserController {
         
         let usersBD = await User.find({
             $or: [{userName: username}, {name}, {idRol}, {'area.id': Number(idArea)}],
-        }).limit( Number(quantity) ).skip( Number(page)-1 );
+        }, { __v:0 }).limit( Number(quantity) ).skip( Number(page)-1 );
         
         usersBD = usersBD.length === 0
-            ?  await User.find().limit( Number(quantity) ).skip( Number(page)-1 )
+            ?  await User.find({}, { __v:0 }).limit( Number(quantity) ).skip( Number(page)-1 )
             : usersBD;
 
         res.status(200).json({
@@ -109,7 +109,7 @@ class UserController {
 
         try {
 
-            const userBD = await User.findByIdAndUpdate(id, update);
+            await User.findByIdAndUpdate(id, update);
 
             res.status(200).json({
                 error: false,

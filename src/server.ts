@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 
 import { routesAuth } from './routes/auth';
 import { routerUser } from './routes/user';
+import { routerAreas } from './routes/areas';
+import { routerRoles } from './routes/roles';
 import { routerGlobals } from './globals/routes';
 
 class Server {
@@ -22,7 +24,7 @@ class Server {
 
     config():void {
 
-        // COnfiguracion de la base de datos
+        // Configuracion de la base de datos
         mongoose.connect('mongodb://localhost:27017/sora-app')
             .then(() => console.log("base de datos activa") )
             .catch(error => console.log("a ocurrido un error", console.error() ));
@@ -37,7 +39,11 @@ class Server {
     routes():void {
         
         this.app.use( "/api/auth", routesAuth.getRouter() );
-        this.app.use( "/api/users", routerUser.getRouter() );
+        this.app.use( "/api/config",
+            routerUser.getRouter(),
+            routerAreas.getRouter(),
+            routerRoles.getRouter(),
+        );
         this.app.use( "/api/globals", routerGlobals.getRouter() );
     }
 
