@@ -17,7 +17,7 @@ class Routes extends Middleware {
 
         this.router = Router();
         this.validateFormLogin = [
-            body('email').isEmail().normalizeEmail().escape().withMessage('El email es incorrecto'),
+            body('email').not().isEmpty().escape().withMessage('El email o usuario es incorrecto'),
             body('password').isLength({ min: 1 }).escape().withMessage('El password es requrido')
         ];
         this.validateFormChangePassword = [

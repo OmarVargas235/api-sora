@@ -61,11 +61,16 @@ class UserRoutes extends Middleware {
             user.updateUser,
         );
 
-        this.router.delete('/delete-user',
-            this.validateIDUser,
+        this.router.delete('/delete-user/:id',
             this.verifyAuth,
             this.showError,
             user.deleteUser,
+        );
+
+        this.router.get('/excel',
+            // this.verifyAuth,
+            // this.showError,
+            user.exportExcel,
         );
     }
 }

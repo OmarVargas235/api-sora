@@ -2,7 +2,7 @@ import { IModule } from '../interfaces/IConfig';
 
 export const modules:IModule[] = [ 
     {
-        "access": [1, 2, 3, 4],
+        "access": ["620c75c9f7b32776c55c7262", 2, 3, 4],
         "icon" : "receipt_icon",
         "module" : "Facturación",
         "id" : 1,
@@ -23,7 +23,7 @@ export const modules:IModule[] = [
         ]
     }, 
     {
-        "access": [1, 2, 3, 4],
+        "access": ["620c75c9f7b32776c55c7262", 2, 3, 4],
         "icon" : "inventory_icon",
         "module" : "Inventario",
         "id" : 2,
@@ -45,7 +45,7 @@ export const modules:IModule[] = [
         ]
     }, 
     {
-        "access": [1, 2, 3, 4, 5],
+        "access": ["620c75c9f7b32776c55c7262", 2, 3, 4, 5],
         "icon" : "support_agent_icon",
         "module" : "Clientes",
         "id" : 3,
@@ -59,7 +59,7 @@ export const modules:IModule[] = [
         ]
     }, 
     {
-        "access": [1, 2, 4],
+        "access": ["620c75c9f7b32776c55c7262", 2, 4],
         "icon" : "shop_icon",
         "module" : "Compras",
         "id" : 4,
@@ -78,7 +78,7 @@ export const modules:IModule[] = [
         ]
     },
     {
-        "access": [1, 2, 3],
+        "access": ["620c75c9f7b32776c55c7262", 2, 3],
         "icon" : "moving_icon",
         "module" : "Entradas",
         "id" : 5,
@@ -92,7 +92,7 @@ export const modules:IModule[] = [
         ]
     }, 
     {
-        "access": [1, 2, 3],
+        "access": ["620c75c9f7b32776c55c7262", 2, 3],
         "icon" : "moving_icon",
         "module" : "Salidas",
         "id" : 6,
@@ -103,7 +103,7 @@ export const modules:IModule[] = [
         ]
     }, 
     {
-        "access": [1, 2],
+        "access": ["620c75c9f7b32776c55c7262", 2],
         "icon" : "settings_icon",
         "module" : "Configuración",
         "id" : 7,

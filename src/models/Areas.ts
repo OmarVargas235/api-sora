@@ -6,6 +6,7 @@ const modelSchema = new Schema({
         required: true,
         lowercase: true,
         trim: true,
+        unique: true,
     },
     active: Boolean,
 });

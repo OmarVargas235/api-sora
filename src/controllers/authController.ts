@@ -60,9 +60,9 @@ class Auth {
         const  { email, password } = req.body;
         
         try {
-
-            const userBD = await User.findOne({ email });
-
+            
+            const userBD = await User.findOne({ $or: [{ email }, { userName: email }] });
+            
             if (!userBD) {
                 
                 res.status(400).json({
