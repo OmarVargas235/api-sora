@@ -68,8 +68,8 @@ class UserRoutes extends Middleware {
         );
 
         this.router.get('/excel',
-            // this.verifyAuth,
-            // this.showError,
+            this.verifyAuth,
+            this.showError,
             user.exportExcel,
         );
     }

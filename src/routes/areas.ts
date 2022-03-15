@@ -37,18 +37,32 @@ class RouterAreas extends Middleware {
             this.showError,
             areasController.getAreas,
         );
+
         this.router.post('/create-area',
             this.validateAreas,
             this.verifyAuth,
             this.showError,
             areasController.createArea
         );
+
         this.router.put('/update-area',
             this.validateAreas,
             this.validateIDAreas,
             this.verifyAuth,
             this.showError,
             areasController.updateArea
+        );
+
+        this.router.delete('/delete-area',
+            this.verifyAuth,
+            this.showError,
+            areasController.deleteArea
+        );
+
+        this.router.get('/excel-areas',
+            this.verifyAuth,
+            this.showError,
+            areasController.exportExcel,
         );
     }
 }

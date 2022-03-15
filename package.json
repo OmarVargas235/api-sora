@@ -18,8 +18,7 @@
     "express-validator": "^6.10.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.1.7",
-    "nodemailer": "^6.7.2",
-    "shortid": "^2.2.16"
+    "nodemailer": "^6.7.2"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",

@@ -20,7 +20,6 @@ class RouterRoles extends Middleware {
         ];
         this.validateUpdateRoles = [
             body('name').not().isEmpty().escape().withMessage('El campo Rol es requerido'),
-            body('id').not().isEmpty().escape().withMessage('El ID es requerido'),
         ];
 
         this.routers();
@@ -38,12 +37,14 @@ class RouterRoles extends Middleware {
             this.showError,
             rolesController.getRoles,
         );
+        
         this.router.post('/create-rol',
             this.validateRoles,
             this.verifyAuth,
             this.showError,
             rolesController.createRol
         );
+
         this.router.put('/update-rol',
             this.validateUpdateRoles,
             this.verifyAuth,

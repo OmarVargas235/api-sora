@@ -7,6 +7,11 @@ const modelSchema = new mongoose.Schema({
 		unique: true,
         required: true,
 	},
+	id: {
+		type: String,
+		lowercase: true,
+		default: "",
+	},
 });
 
 export const Rol = mongoose.model('Roles', modelSchema);

@@ -1,3 +1,5 @@
+import { Response } from 'express';
+
 export interface IOptions {
     email:string;
     subject:string;
@@ -11,4 +13,12 @@ export interface IModule {
     module:string;
     id:number|string;
     programs:[...string[], object];
+}
+
+export interface IGenerateExcel {
+    nameExcel:string;
+    headersExcel:{ header: string; key: string; width: number; }[];
+    data:object[];
+    res:Response;
+    setData:(data:any)=>object;
 }

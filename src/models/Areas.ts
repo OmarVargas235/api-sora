@@ -8,7 +8,10 @@ const modelSchema = new Schema({
         trim: true,
         unique: true,
     },
-    active: Boolean,
+    active: {
+        type: Boolean,
+        default: true,
+    },
 });
 
 export const Area = model('Area', modelSchema);

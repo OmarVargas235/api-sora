@@ -1,9 +1,6 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { Document } from 'mongoose';
-import ExcelJS from 'exceljs';
-import fs from 'fs';
-import shortid from 'shortid';
 
 import { User } from '../models/User';
 import { Rol } from '../models/Rol';
@@ -11,32 +8,35 @@ import { Area } from '../models/Areas';
 import { roles, IRol } from '../utils/roles';
 import { areas, IArea } from '../utils/areas';
 import { modules } from '../utils/modules';
+import { generateExcel } from '../utils/helper';
+
+interface IUser {
+    userName:string;
+    name:string;
+    email:string;
+    area: { description:string };
+    rol: { name:string };
+    active:string;
+}
 
 class UserController {
 
-    private workbook;
-
-    constructor() {
-
-        this.workbook = new ExcelJS.Workbook();
-    }
-
     public getUsers = async (req:Request, res:Response):Promise<void> => {
 
-        const { data, quantity } = req.query;
+        const { data, limit } = req.query;
 
-        if (!quantity) {
+        if (!limit) {
             
             res.status(400).json({
                 code: 400,
                 error: true,
-                data: "Debes enviar el campo 'Cantidad'"
+                data: "Debes enviar el campo 'limit'"
             });
 
             return;
         }
 
-        if (Number(quantity) < 1) {
+        if (Number(limit) < 0) {
             
             res.status(200).json({
                 code: 200,
@@ -53,7 +53,7 @@ class UserController {
         const usersBD = await User.find({
             $or: [{userName: regex}, {userName: regex}, {name: regex}, {email: regex}, {nameRol: regex}, {nameArea: regex}],
             $and: [{ active: true }],
-        }, { __v:0, modules:0, password:0, tokenURL:0, nameRol:0, nameArea:0 }).limit( Number(quantity) ).populate('rol area', 'name _id description');
+        }, { __v:0, modules:0, password:0, tokenURL:0, nameRol:0, nameArea:0 }).limit(Number(limit)).populate('rol area', 'name _id description');
         
         res.status(200).json({
             error: false,
@@ -187,17 +187,10 @@ class UserController {
 
         try {
 
-            // Verificar que la carpeta /public/excels exista
-            const isExistsFolder:boolean = fs.existsSync('public/excels/');
-            !isExistsFolder && fs.mkdirSync('public/excels/', { recursive:true });
-
             // Traer todos los usuarios
             const usersBD = await User.find({}, { __v:0, modules:0, password:0, tokenURL:0, nameRol:0, nameArea:0 }).populate('rol area', 'name _id description');
 
-            // Creando excel
-            const workssheet = this.workbook.addWorksheet('excel'+shortid());
-            
-            workssheet.columns = [
+            const columns = [
                 { header: 'UserName', key: 'userName', width: 20 },
                 { header: 'Name', key: 'name', width: 20 },
                 { header: 'Email', key: 'email', width: 30 },
@@ -206,43 +199,28 @@ class UserController {
                 { header: 'Activo', key: 'active', width: 10 },
             ];
 
-            usersBD.forEach(user => {
-
-                workssheet.addRow({
-                    userName: user.userName,
-                    name: user.name,
-                    email: user.email,
-                    area: user.area.description,
-                    permits: user.rol.name,
-                    active: user.active ? 'Activo' : 'Inactivo',
-                });
+            generateExcel({
+                nameExcel: 'excel-users',
+                headersExcel: columns,
+                data: usersBD,
+                res,
+                setData: this.setData,
             });
-
-            workssheet.getRow(1).eachCell(cell => {
-
-                cell.font = { bold: true };
-            });
-
-            const data = await this.workbook.xlsx.writeFile('public/excels/excel-users.xlsx')
-                .then(async () => {
-
-                    // Creando el archivo excel-users.xlsx
-                    const fileName = 'excel-users.xlsx';
-
-                    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                    res.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-
-                    await this.workbook.xlsx.write(res);
-
-                    res.end();
-                })
-                .catch(err => console.log({ step: 'exportExcel', error: err.toString() }));
         
         } catch(err:any) {
-
+            
             console.log({ step: 'userController exportExcel', error: err.toString() });
         }
     }
+
+    private setData = (user:IUser):object => ({
+        userName: user.userName,
+        name: user.name,
+        email: user.email,
+        area: user?.area.description || "",
+        permits: user?.rol?.name || "",
+        active: user.active ? 'Activo' : 'Inactivo',
+    });
 }
 
 export const user = new UserController();
